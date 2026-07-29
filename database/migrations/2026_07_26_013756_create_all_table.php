@@ -101,6 +101,7 @@ return new class extends Migration
         Schema::create('reservations', function (Blueprint $table) {
            $table->id();
            $table->integer('id_unit');
+           $table->integer('id_area');
            $table->datetime('reservation_date');
         });
     }

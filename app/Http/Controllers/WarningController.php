@@ -6,6 +6,8 @@ use App\Models\Unit;
 use App\Models\Warning;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class WarningController extends Controller
 {
@@ -16,7 +18,7 @@ class WarningController extends Controller
         if($property){
             $user = Auth::user();
 
-            $unit = Unit::where('id', $property)->where('id_owner', $user->id);
+            $unit = Unit::where('id', $property)->where('id_owner', $user->id)->count();
 
             if($unit > 0) {
 
@@ -48,6 +50,63 @@ class WarningController extends Controller
             $array['error'] = 'A propriedade é necessaria.';
         }
 
+        return $array;
+    }
+
+    public function addWarningFile(Request $request) {
+        $array = ['error' => ''];
+
+        $validator = Validator::make($request->all(),[
+            'photo' => 'required|file|mimes:jpg,png'
+        ]);
+
+        if(!$validator->fails()){
+            $file = $request->file('photo')->store('public');
+
+            $array['photo'] = asset(Storage::url($file));
+        }else{
+            $array['error'] = $validator->errors()->first();
+            return $array;
+        }
+
+        return $array;
+    }
+
+    public function setWarning(Request $request) {
+        $array = ['error' => ''];
+
+        $validator = Validator::make($request->all(), [
+            'title' => 'required',
+            'property' => 'required',
+            'list' => 'nullable|array'
+        ]);
+
+        if (!$validator->fails()) {
+            $title = $request->input('title');
+            $property = $request->input('property');
+            $list = $request->input('list');
+
+            $newWarn = new Warning();
+            $newWarn->id_unit = $property;
+            $newWarn->title = $title;
+            $newWarn->status = 'IN REVIEW';
+            $newWarn->datecreated = date('Y-m-d');
+
+            $photos = [];
+            if ($list && is_array($list)) {
+                foreach ($list as $listItem) {
+                    $url = explode('/', $listItem);
+                    $photos[] = end($url);
+                }
+            }
+
+            $newWarn->photos = !empty($photos) ? implode(',', $photos) : '';
+            $newWarn->save();
+
+            $array = ['data' => $newWarn];
+        } else {
+            $array['error'] = $validator->errors()->first();
+    }
         return $array;
     }
 }

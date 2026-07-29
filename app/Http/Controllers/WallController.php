@@ -57,4 +57,5 @@ class WallController extends Controller
 
         return $array;
     }
+    
 }

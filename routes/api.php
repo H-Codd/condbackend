@@ -30,6 +30,7 @@ Route::middleware('auth:api')->group(function(){
     // Auth::Validator
     Route::post('/auth/validate', [AuthController::class, 'validateToken']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
+    Route::put('/auth/user/{id}', [AuthController::class, 'update']);
 
     // Wall
     Route::get('/walls', [WallController::class, 'getAll']);
@@ -39,11 +40,11 @@ Route::middleware('auth:api')->group(function(){
     Route::get('/docs', [DocController::class, 'getAll']);
 
     // Warnings
-    Route::get('/warnings', [WallController::class, 'getMyWarnings']);
-    Route::post('/warning', [WallController::class, 'setWarning']);
-    Route::post('/warning/file', [WallController::class, 'addWarningFile']);
+    Route::get('/warnings', [WarningController::class, 'getMyWarnings']);
+    Route::post('/warning', [WarningController::class, 'setWarning']);
+    Route::post('/warning/file', [WarningController::class, 'addWarningFile']);
 
-    // Boletos
+    // Billets
     Route::get('/billets', [BilletController::class, 'getAll']);
 
     // FoundandLost
@@ -62,7 +63,7 @@ Route::middleware('auth:api')->group(function(){
     
     // Reservation
     Route::get('/reservations', [ReservationController::class, 'getReservations']);
-    Route::post('/reservations/{id}', [ReservationController::class, 'setReservations']);
+    Route::post('/reservation/{id}', [ReservationController::class, 'setReservation']);
 
     Route::get('/reservation/{id}/disableddates', [ReservationController::class, 'getDisabledDates']);
     Route::get('/reservation/{id}/time', [ReservationController::class, 'getTimes']);

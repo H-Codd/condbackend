@@ -11,7 +11,7 @@ class BilletController extends Controller
 {
     public function getAll(Request $request) {
         $array = ['error' => ''];
-        $property = $request->ipnut('property');
+        $property = $request->input('property');
         if($property){
 
             $user = Auth::user();     
@@ -22,7 +22,7 @@ class BilletController extends Controller
             $billets = Billet::where('id_unit', $property)->get();
             
             foreach($billets as $billetKey => $billetValue){
-                $billets[$billetKey]['fileurl'] = asset('stoage/'.$billetValue['fileurl']);
+                $billets[$billetKey]['fileurl'] = asset('storage/'.$billetValue['fileurl']);
                 }
                 
                 $array['list'] = $billets;

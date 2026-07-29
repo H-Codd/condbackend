@@ -6,6 +6,7 @@ use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
@@ -123,6 +124,57 @@ class AuthController extends Controller
             Auth::logout();
         }catch(\Exception $e){
             return['error' => $e->getMessage()];
+        }
+    }
+    public function update(int $id, Request $request){
+        $user = Auth::user();
+        $validator = Validator::make($request->all(), [
+            'name'      => 'nullable|string|max:255',
+            'email'     => 'nullable|email|unique:users,email,' . $user->id,
+            'password'  => 'nullable|confirmed',
+            'cpf'       => 'nullable|string|unique:users,cpf,' . $user->id,
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->errors()->first()
+            ], 422);
+        }
+
+        $updateUser = User::find($id);
+        if (!$updateUser) {
+            return response()->json([
+                'error' => 'Usuário inexistente'
+            ], 404);
+        }
+
+         $changed = false;
+
+        if ($request->filled('name')) {
+            $updateUser->name = $request->input('name');
+            $changed = true;
+        }
+        if ($request->filled('email')) {
+            $updateUser->email = $request->input('email');
+            $changed = true;
+        }
+        if ($request->filled('cpf')) {
+            $updateUser->cpf = $request->input('cpf');
+            $changed = true;
+        }
+        if ($request->filled('password')) {
+            $updateUser->password = Hash::make($request->input('password'));
+            $changed = true;
+        }
+
+        if ($changed) {
+            $updateUser->save();
+            return [
+                'message' => 'Usuário atualizado com sucesso',
+                'user'    => $updateUser
+            ];
+        } else {
+            return ['error' => 'Nenhum dado foi alterado'];
         }
     }
 }
